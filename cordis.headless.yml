@@ -4,6 +4,13 @@
 # This file mirrors the web overlay. Keeping them separate lets the web profile
 # mount extra UI plugins while headless stays minimal.
 
+# Point the skill filesystem provider at this project's skills directory.
+- id: skill-filesystem
+  name: '@deepseek-ai/dsh-skill-filesystem'
+  config:
+    customSkillDirs:
+      - /Users/aleff.porto/person/agentic-harness/.dsh/skills
+
 - id: llm-deepseek
   disabled: true
 

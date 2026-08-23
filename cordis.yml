@@ -6,6 +6,13 @@
 # routes (Ollama cloud + Anthropic + OpenAI), declares subagent presets with
 # personas, and points the default agent at Ollama.
 
+# Point the skill filesystem provider at this project's skills directory.
+- id: skill-filesystem
+  name: '@deepseek-ai/dsh-skill-filesystem'
+  config:
+    customSkillDirs:
+      - /Users/aleff.porto/person/agentic-harness/.dsh/skills
+
 # Disable the DeepSeek-only adapter so llm-pi-ai owns the routes.
 - id: llm-deepseek
   disabled: true
