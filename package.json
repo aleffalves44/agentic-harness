@@ -3,15 +3,21 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Agentic harness on DeepSeek Harness: task → plan → review → PR flow, multi-provider (Ollama cloud, Anthropic, OpenAI).",
+  "description": "Agentic harness for software development on DeepSeek Harness. Multi-provider (Ollama cloud, Anthropic, OpenAI). task → plan → review → PR flow.",
   "license": "MIT",
   "engines": {
     "node": "^22.19 || >=24"
   },
+  "bin": {
+    "ah": "./bin/cli.js"
+  },
   "scripts": {
-    "dsh": "dsh",
-    "start": "dsh --profile agentic web",
-    "task": "dsh --profile agentic-headless",
-    "plan": "dsh --profile agentic-headless"
+    "start": "node bin/cli.js web",
+    "task": "node bin/cli.js headless",
+    "web": "node bin/cli.js web",
+    "headless": "node bin/cli.js headless"
+  },
+  "dependencies": {
+    "@deepseek-ai/dsh": "0.1.1-rc.2"
   }
 }

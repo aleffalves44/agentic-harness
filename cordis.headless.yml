@@ -9,7 +9,7 @@
   name: '@deepseek-ai/dsh-skill-filesystem'
   config:
     customSkillDirs:
-      - /Users/aleff.porto/person/agentic-harness/.dsh/skills
+      - __PROJECT_ROOT__/.dsh/skills
 
 - id: llm-deepseek
   disabled: true

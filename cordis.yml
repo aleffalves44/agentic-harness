@@ -11,7 +11,7 @@
   name: '@deepseek-ai/dsh-skill-filesystem'
   config:
     customSkillDirs:
-      - /Users/aleff.porto/person/agentic-harness/.dsh/skills
+      - __PROJECT_ROOT__/.dsh/skills
 
 # Disable the DeepSeek-only adapter so llm-pi-ai owns the routes.
 - id: llm-deepseek
