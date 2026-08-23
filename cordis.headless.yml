@@ -1,0 +1,139 @@
+# agentic-harness headless overlay — same as cordis.yml but for one-shot CLI use.
+# Usage: dsh --profile headless --patch ./cordis.headless.yml "task text"
+#
+# This file mirrors the web overlay. Keeping them separate lets the web profile
+# mount extra UI plugins while headless stays minimal.
+
+- id: llm-deepseek
+  disabled: true
+
+- id: llm-pi-ai
+  config:
+    providers:
+      ollama:
+        displayName: Ollama Cloud
+        apiKeyEnv: OLLAMA_API_KEY
+        api: openai-completions
+        baseURL: https://api.ollama.com/v1
+        compat:
+          supportsDeveloperRole: false
+          maxTokensField: max_tokens
+        models:
+          - id: llama3.3
+            contextWindow: 128000
+            maxTokens: 8192
+          - id: qwen2.5-coder
+            contextWindow: 128000
+            maxTokens: 8192
+      anthropic:
+        apiKeyEnv: ANTHROPIC_API_KEY
+        models:
+          - id: claude-sonnet-4-5
+            contextWindow: 200000
+      openai:
+        apiKeyEnv: OPENAI_API_KEY
+
+- id: agent-default-model
+  config:
+    provider: ollama
+    model: llama3.3
+
+- insert:
+    - id: tool-subagent-specifier
+      name: '@deepseek-ai/dsh-tool-subagent'
+      config:
+        provider: spawn
+        toolName: subagent_specifier
+        backgroundMode: one-shot
+        maxDepth: 1
+        persona: |
+          You are specifier, a requirements engineer. Produce a formal SPEC.md
+          in GEARS format (RIGID + FLEXIBLE). Read the task, probe the target
+          repo's AGENTS.md and architecture. Output to specs/features/[slug]/SPEC.md.
+          Never write production code.
+
+    - id: tool-subagent-planner
+      name: '@deepseek-ai/dsh-tool-subagent'
+      config:
+        provider: spawn
+        toolName: subagent_planner
+        backgroundMode: one-shot
+        maxDepth: 1
+        persona: |
+          You are planner. Decompose SPEC.md into phased PLAN.md. Each phase has
+          atomic requirements and acceptance criteria. Write to
+          specs/features/[slug]/PLAN.md. Never write production code.
+
+    - id: tool-subagent-build
+      name: '@deepseek-ai/dsh-tool-subagent'
+      config:
+        provider: spawn
+        toolName: subagent_build
+        backgroundMode: one-shot
+        maxDepth: 1
+        persona: |
+          You are build, a coding agent. Test-first: write the test before the
+          implementation. Run tests. Commit with conventional commits and the
+          trailer block (Co-Authored-By: AI <noreply@local>, AI-Assisted: yes,
+          AI-Harness: agentic-harness). Keep answers brief.
+
+    - id: tool-subagent-bug-fixer
+      name: '@deepseek-ai/dsh-tool-subagent'
+      config:
+        provider: spawn
+        toolName: subagent_bug_fixer
+        backgroundMode: one-shot
+        maxDepth: 1
+        persona: |
+          You are bug-fixer. Investigate root cause first. Write a mini-spec at
+          specs/features/[slug]/SPEC.md. Then implement the minimal fix.
+          Test-first. Commit with the trailer block.
+
+    - id: tool-subagent-reviewer
+      name: '@deepseek-ai/dsh-tool-subagent'
+      config:
+        provider: spawn
+        toolName: subagent_reviewer
+        backgroundMode: one-shot
+        maxDepth: 1
+        persona: |
+          You are reviewer, the last gate before PR. Re-run tests independently.
+          Check structure, correctness, and that the diff matches SPEC/PLAN.
+          Emit QUESTION annotations for unresolved ambiguities (blocks PR).
+          Output PASS/FAIL verdict. Never write production code.
+
+    - id: tool-subagent-pr-opener
+      name: '@deepseek-ai/dsh-tool-subagent'
+      config:
+        provider: spawn
+        toolName: subagent_pr_opener
+        backgroundMode: one-shot
+        maxDepth: 1
+        persona: |
+          You are pr-opener. Open a PR with conventional body: what changed, why,
+          how tested. Stage only product code. Run git and gh via bash. Keep
+          the body factual.
+
+    - id: tool-subagent-spike-researcher
+      name: '@deepseek-ai/dsh-tool-subagent'
+      config:
+        provider: spawn
+        toolName: subagent_spike_researcher
+        backgroundMode: one-shot
+        maxDepth: 1
+        persona: |
+          You are spike-researcher. Investigate a poorly-defined problem. Produce
+          SPIKE.md at specs/spikes/[slug]/SPIKE.md with findings and recommendation.
+          Never write production code.
+
+    - id: tool-subagent-context-bootstrapper
+      name: '@deepseek-ai/dsh-tool-subagent'
+      config:
+        provider: spawn
+        toolName: subagent_context_bootstrapper
+        backgroundMode: one-shot
+        maxDepth: 1
+        persona: |
+          You are context-bootstrapper. Generate the AGENTS.md tree for a target
+          repo: architecture, build/lint/test commands, conventions, file layout.
+          Output AGENTS.md at the repo root. Never modify product code.
