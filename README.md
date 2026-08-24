@@ -11,6 +11,19 @@ Agentic harness for software development on [DeepSeek Harness](https://github.co
 
 ## Instalação
 
+Opção 1 — **Docker (recomendado)**:
+
+```sh
+git clone <seu-fork-do-agentic-harness>
+cd agentic-harness
+docker compose up --build
+# abre http://localhost:3080
+```
+
+A imagem constrói o dsh a partir do fonte (para resolver os bundles do profile web), linka o projeto como overlay, e expõe a UI na porta 3080. Keys de provider ficam no volume `dsh-home` (persistente); configure pela UI em Settings → Models.
+
+Opção 2 — **Local (desenvolvimento)**:
+
 ```sh
 git clone <seu-fork-do-agentic-harness>
 cd agentic-harness
@@ -66,6 +79,27 @@ Em `cordis.yml` e `cordis.headless.yml`:
 ```
 
 ## Uso
+
+### Docker (recomendado)
+
+```sh
+# Suba a Web UI (build na primeira vez ~5-10 min):
+docker compose up --build
+# abre http://localhost:3080
+
+# Configure providers em Settings → Models (keys persistem no volume dsh-home).
+# Digite /task, /plan, /spike, /pr, /context no composer.
+```
+
+Para passar keys via env em vez da UI, crie `.env` no root:
+
+```
+OLLAMA_API_KEY=...
+ANTHROPIC_API_KEY=...
+OPENAI_API_KEY=...
+```
+
+### Local
 
 ### Headless (one-shot)
 

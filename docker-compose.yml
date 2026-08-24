@@ -1,0 +1,46 @@
+# docker-compose.yml — agentic-harness Web UI.
+#
+# Builds the dsh runtime from source (so the `web` profile bundles resolve),
+# mounts this project as the overlay, and exposes the UI on :3080.
+#
+# The overlay's `webserver` entry binds 0.0.0.0 inside the container (the dsh
+# CLI blocks --host 0.0.0.0 for interactive dev safety, but inside a container
+# this is the intended posture).
+#
+# Usage:
+#   docker compose up --build
+#   open http://localhost:3080
+#
+# Set provider keys via environment or a .env file beside this compose file:
+#   OLLAMA_API_KEY=...
+#   ANTHROPIC_API_KEY=...
+#   OPENAI_API_KEY=...
+#
+# The UI's Settings → Models page also stores keys in $DSH_HOME/.credentials.yaml
+# (persisted in the `dsh-home` volume), so you only need env vars for the first
+# run or for headless use.
+
+services:
+  agentic-harness:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: agentic-harness:latest
+    container_name: agentic-harness
+    ports:
+      - "3080:3080"
+    environment:
+      # Keys are optional; the UI writes them to the credentials store on
+      # first save. Leave empty to configure via the UI.
+      OLLAMA_API_KEY: ${OLLAMA_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    volumes:
+      # Persist sessions, settings, and credentials across container rebuilds.
+      - dsh-home:/root/.dsh
+      # Persist pipeline artifacts (specs/plans) on the host for inspection.
+      - ./specs:/app/agentic-harness/specs
+    restart: unless-stopped
+
+volumes:
+  dsh-home:

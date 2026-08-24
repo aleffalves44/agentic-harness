@@ -58,7 +58,15 @@ if (existsSync(installedBin)) {
 }
 
 if (mode === 'headless' && taskArgs.length > 0) {
-  args.push(taskArgs.join(' '))
+  // Headless: join non-flag args into the task text. Flags (start with --)
+  // are passed through to dsh verbatim.
+  const flags = taskArgs.filter(a => a.startsWith('--'))
+  const taskText = taskArgs.filter(a => !a.startsWith('--')).join(' ')
+  if (taskText) args.push(taskText)
+  args.push(...flags)
+} else if (taskArgs.length > 0) {
+  // Web (or other): pass all extra args (e.g. --port, --host) to dsh.
+  args.push(...taskArgs)
 }
 
 function cleanup() {

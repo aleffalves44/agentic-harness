@@ -13,6 +13,15 @@
     customSkillDirs:
       - __PROJECT_ROOT__/.dsh/skills
 
+# Bind the webserver to all interfaces so the container is reachable from the
+# host / caddy reverse proxy. The dsh CLI blocks --host 0.0.0.0 for RCE safety
+# (interactive dev), but inside a container this is the intended posture.
+# Override the webStartup-derived host directly.
+- id: webserver
+  config:
+    host: 0.0.0.0
+    port: 3080
+
 # Disable the DeepSeek-only adapter so llm-pi-ai owns the routes.
 - id: llm-deepseek
   disabled: true
