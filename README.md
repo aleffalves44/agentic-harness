@@ -86,18 +86,49 @@ Em `cordis.yml` e `cordis.headless.yml`:
 # Suba a Web UI (build na primeira vez ~5-10 min):
 docker compose up --build
 # abre http://localhost:3080
-
-# Configure providers em Settings → Models (keys persistem no volume dsh-home).
-# Digite /task, /plan, /spike, /pr, /context no composer.
 ```
 
-Para passar keys via env em vez da UI, crie `.env` no root:
+### Cadastrar providers pela UI
 
+Após abrir a UI, cadastre seus providers em **Settings → Models** — não precisa editar YAML.
+
+**Add a catalog provider** (Anthropic, OpenAI, DeepSeek — endpoint e protocolo já conhecidos):
+1. Clique **Add provider**.
+2. Selecione o provider (ex: Anthropic).
+3. Digite a API key.
+4. Salve. A key é armazenada redacted em `$DSH_HOME/.credentials.yaml` (volume `dsh-home`); o settings retém só a referência.
+
+**Add a custom provider** (Ollama cloud, gateways, self-hosted — OpenAI-compatible):
+1. Clique **Add a custom provider**.
+2. Preencha:
+   - **Provider ID**: `ollama` (permanente; usado em requests, sessions, credential refs).
+   - **Display name**: `Ollama Cloud`.
+   - **Base URL**: `https://<seu-endpoint>/v1` (endpoint OpenAI-compat da sua Ollama cloud).
+   - **API protocol**: `openai-completions`.
+   - **API key**: sua key da Ollama cloud.
+3. Em **Model catalog**, clique **Fetch available models** para listar os modelos do endpoint, ou adicione manualmente (`llama3.3`, `qwen2.5-coder`, etc.).
+4. Salve.
+
+Para compat switches que a UI não expõe (`supportsDeveloperRole`, `maxTokensField`), edite `$DSH_HOME/settings.yaml` dentro do container (ou monte o arquivo no volume `dsh-home`):
+
+```yaml
+llm-pi-ai:
+  providers:
+    ollama:
+      compat:
+        supportsDeveloperRole: false
+        maxTokensField: max_tokens
 ```
-OLLAMA_API_KEY=...
-ANTHROPIC_API_KEY=...
-OPENAI_API_KEY=...
-```
+
+Para Ollama, os dois switches acima corrigem o shape de request (system prompt como `developer` role e `max_completion_tokens` vs `max_tokens`).
+
+### Selecionar modelo padrão
+
+No seletor de modelo (topo da UI), escolha o provider+modelo. A seleção torna-se o default para novas sessões. Sessões com request já enviado mantêm o modelo gravado no próprio log.
+
+### Usar skills (slash-commands)
+
+Na composer, digite `/task`, `/plan`, `/spike`, `/pr`, `/context`. As 7 skills em `.dsh/skills/` são descobertas automaticamente.
 
 ### Local
 
