@@ -1,0 +1,30 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build outputs
+dist/
+lib/
+*.tsbuildinfo
+
+# dsh local state
+.dsh/sessions/
+.agent-qa/
+
+# env / secrets
+.env
+.env.*
+*.local.yaml
+
+# pipeline artifacts (local scaffolding, never committed)
+specs/features/
+specs/spikes/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# logs
+*.log
