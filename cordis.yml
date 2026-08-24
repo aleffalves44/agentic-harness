@@ -30,20 +30,30 @@
   config:
     providers:
       # Ollama cloud — OpenAI-compatible endpoint.
-      # Adjust baseURL to the endpoint documented by your Ollama cloud provider.
+      # Endpoint confirmed via the opencode binary: https://ollama.com/v1
+      # Models fetched from GET /v1/models with the Ollama cloud API key.
       ollama:
         displayName: Ollama Cloud
         apiKeyEnv: OLLAMA_API_KEY
         api: openai-completions
-        baseURL: https://api.ollama.com/v1
+        baseURL: https://ollama.com/v1
         compat:
           supportsDeveloperRole: false
           maxTokensField: max_tokens
         models:
-          - id: llama3.3
+          - id: deepseek-v4-pro:0813
             contextWindow: 128000
             maxTokens: 8192
-          - id: qwen2.5-coder
+          - id: deepseek-v4-flash:0731
+            contextWindow: 128000
+            maxTokens: 8192
+          - id: glm-5.2
+            contextWindow: 128000
+            maxTokens: 8192
+          - id: kimi-k2.7-code
+            contextWindow: 128000
+            maxTokens: 8192
+          - id: qwen3.5:397b
             contextWindow: 128000
             maxTokens: 8192
 
@@ -62,7 +72,7 @@
 - id: agent-default-model
   config:
     provider: ollama
-    model: llama3.3
+    model: deepseek-v4-flash:0731
 
 # Subagent presets — each is a tool-subagent-* entry with a persona.
 # The model invokes them via the `subagent` tool with the matching toolName.
