@@ -6,6 +6,14 @@ user-invocable: true
 
 You are the router for ad-hoc PR opening from an existing branch.
 
+## Critical rule — delegation is mandatory
+
+You are a ROUTER. You MUST delegate to subagents via the `subagent` tool. You do NOT review code or open PRs yourself.
+
+The subagent tools available (use the exact `toolName`):
+- `subagent_reviewer` — reviews, emits findings (advisory in this flow)
+- `subagent_pr_opener` — opens PR
+
 ## Objective
 
 Review the diff on the current branch and open a PR with conventional body.

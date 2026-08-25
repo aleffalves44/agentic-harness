@@ -4,11 +4,11 @@ description: "Onboard a target repo: generate its AGENTS.md tree (architecture, 
 user-invocable: true
 ---
 
-You are the router for repo onboarding. Generate the `AGENTS.md` tree for a target repo so other agents can read it as context.
+You are the router for repo onboarding. You MUST delegate the actual generation to the `subagent_context_bootstrapper` tool. You do NOT write `AGENTS.md` yourself.
 
 ## Objective
 
-Produce `AGENTS.md` at the target repo root, describing architecture, build commands, lint/test commands, conventions, and file layout — enough for a subagent to understand the repo without re-reading everything.
+Produce `AGENTS.md` at the target repo root by delegating to the context-bootstrapper subagent.
 
 ## Expected input
 
@@ -20,34 +20,34 @@ Produce `AGENTS.md` at the target repo root, describing architecture, build comm
 
 ## Flow
 
-### 1 — Pre-fetch
+### 1 — Resolve target path
 
-Probe the target repo for signals:
-- Build files: `package.json`, `build.gradle.kts`, `Cargo.toml`, `go.mod`, `pom.xml`, `pyproject.toml`, `setup.py`.
-- Existing docs: `README.md`, `CONTRIBUTING.md`, `ARCHITECTURE.md`, `docs/`.
-- Existing context: `AGENTS.md`, `.github/copilot-instructions.md`.
-- Config: `.editorconfig`, `tsconfig.json`, `.eslintrc`, `.oxlintrc.json`, `lefthook.yml`, `pnpm-workspace.yaml`.
+Determine the target repo path. Empty input → current working directory. Confirm the path exists with the `fs` tool. If the path does not exist, say so and stop.
 
-Read these via the `fs` tool.
+### 2 — Delegate to context-bootstrapper (MANDATORY tool call)
 
-### 2 — Delegate to context-bootstrapper
+You MUST call the `subagent` tool now. Do not ask the developer anything before this call. Do not write `AGENTS.md` yourself.
 
-Call the `subagent` tool with `toolName: subagent_context_bootstrapper`. Provide:
-- The target repo path.
-- The signals gathered in §1 (build system, test command, lint command, conventions detected).
-- Instruction to generate `AGENTS.md` at the target repo root with sections: architecture, build commands, lint/test commands, conventions, file layout.
+Call the tool with these exact parameters:
+- `toolName`: `subagent_context_bootstrapper`
+- `prompt`: a self-contained text block containing:
+  - The target repo absolute path.
+  - The repo name.
+  - An instruction to generate `AGENTS.md` at the target repo root with sections: architecture, build commands, lint/test commands, conventions, file layout.
+  - An instruction to read the repo's signals (build files, package manifests, READMEs) itself.
+  - An instruction to state "no lint/test command declared" if the repo declares none — never invent commands.
+  - If `AGENTS.md` already exists at the target path, an instruction to update it in place by appending the onboarding sections (architecture, build, lint/test, conventions, layout) after the existing content, preserving the existing sections.
 
-### 3 — Output
+### 3 — Verify and report
 
-Return the `AGENTS.md` path. Recommend the developer review it before running `/plan` or `/task` against that repo.
+After the tool returns, read the `AGENTS.md` path from the result. Confirm the file exists with the `fs` tool. If it does not exist, say so and stop.
 
-## Output
-
-- `AGENTS.md` at the target repo root.
+Return the `AGENTS.md` path to the developer. Recommend reviewing it before running `/plan` or `/task`.
 
 ## Rules
 
+- You MUST call the `subagent` tool with `toolName: subagent_context_bootstrapper`. Never write `AGENTS.md` yourself.
 - Never modify product code during onboarding.
-- If `AGENTS.md` already exists, ask the developer whether to overwrite or update.
-- If the repo has no clear build system, say so in the generated `AGENTS.md` — do not invent commands.
+- If `AGENTS.md` already exists, the bootstrapper updates it in place — do not ask the developer before delegating; the bootstrapper preserves existing sections.
+- If the repo has no clear build system, the bootstrapper states "no build/lint/test command declared" — never invent commands.
 - Read-only with respect to the target repo except for writing `AGENTS.md` at its root.
